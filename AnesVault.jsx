@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "./src/lib/supabaseClient";
+import { supabase } from "./supabaseClient";
 
 const CATEGORIES = [
   "Vital Sign Flow Charts",
@@ -923,8 +923,9 @@ function AnesVault() {
   const handleCredAuthSubmit = async () => {
     if (!credEmail || !credPw) { setToast("❌ Enter email and password"); return; }
     setCredBusy(true);
-    const fn = credAuthMode === "signup" ? supabase.auth.signUp : supabase.auth.signInWithPassword;
-    const { error } = await fn({ email: credEmail, password: credPw });
+    const { error } = credAuthMode === "signup"
+      ? await supabase.auth.signUp({ email: credEmail, password: credPw })
+      : await supabase.auth.signInWithPassword({ email: credEmail, password: credPw });
     setCredBusy(false);
     if (error) { setToast(`❌ ${error.message}`); return; }
     setCredPw("");
@@ -1356,7 +1357,7 @@ function AnesVault() {
                   <div className="form-label">Notes (optional)</div>
                   <input className="form-input" placeholder="Notes" value={credForm.notes} onChange={e => setCredForm(f => ({ ...f, notes: e.target.value }))} style={{ marginBottom: 12 }} />
                   <div className="form-label">Document (optional)</div>
-                  <input className="form-input" type="file" onChange={e => setCredForm(f => ({ ...f, file: e.target.files[0] || null }))} style={{ marginBottom: 16 }} />
+                  <input className="form-input" type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={e => setCredForm(f => ({ ...f, file: e.target.files[0] || null }))} style={{ marginBottom: 16 }} />
                   <button className="submit-btn" onClick={addCredential} disabled={holders.length === 0}><Icon name="check" size={16} /> Add Credential</button>
                 </div>
               )}
